@@ -22,6 +22,17 @@ if TYPE_CHECKING:
     from typing import ContextManager
 
 
+class GroupRequestInterface(object):
+    """Abstract base class for requests for group membership."""
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def cancel_all_requests_for_user(self, user):
+        # type: (str) -> None
+        pass
+
+
 class PermissionInterface(object):
     """Abstract base class for permission operations and queries."""
 
@@ -43,25 +54,29 @@ class PermissionInterface(object):
         pass
 
 
+class ServiceAccountInterface(object):
+    """Abstract base class for service account operations and queries."""
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def create_service_account_from_disabled_user(self, user):
+        # type: (str) -> None
+        pass
+
+    @abstractmethod
+    def enable_service_account(self, user, owner):
+        # type: (str, str) -> None
+        pass
+
+
 class TransactionInterface(object):
     """Abstract base class for starting and committing transactions."""
 
     __metaclass__ = ABCMeta
 
-    @abstractmethod
     def transaction(self):
         # type: () -> ContextManager[None]
-        pass
-
-
-class ServiceFactoryInterface(object):
-    """Abstract base class for creating services."""
-
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def create_permission_service(self):
-        # type: () -> PermissionInterface
         pass
 
 
@@ -71,11 +86,26 @@ class UserInterface(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
+    def disable_user(self, user):
+        # type: (str) -> None
+        pass
+
+    @abstractmethod
+    def groups_of_user(self, user):
+        # type: (str) -> List[str]
+        pass
+
+    @abstractmethod
     def user_can_create_permissions(self, user):
         # type: (str) -> bool
         pass
 
     @abstractmethod
     def user_is_permission_admin(self, user):
+        # type: (str) -> bool
+        pass
+
+    @abstractmethod
+    def user_is_user_admin(self, user):
         # type: (str) -> bool
         pass

@@ -4,7 +4,6 @@ from grouper.services.audit_log import AuditLogService
 from grouper.services.permission import PermissionService
 from grouper.services.transaction import TransactionService
 from grouper.services.user import UserService
-from grouper.usecases.interfaces import ServiceFactoryInterface
 
 if TYPE_CHECKING:
     from grouper.repositories.factory import RepositoryFactory
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
     )
 
 
-class ServiceFactory(ServiceFactoryInterface):
+class ServiceFactory(object):
     """Construct backend services."""
 
     def __init__(self, repository_factory):
