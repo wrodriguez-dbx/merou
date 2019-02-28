@@ -17,10 +17,9 @@ class GroupRequestService(GroupRequestInterface):
         self.group_request_repository = group_request_repository
         self.audit_log_service = audit_log_service
 
-    def cancel_all_requests_for_user(self, user, authorization):
-        # type: (str, Authorization) -> None
+    def cancel_all_requests_for_user(self, user, reason, authorization):
+        # type: (str, str, Authorization) -> None
         pending_requests = self.group_request_repository.pending_requests_for_user(user)
-        reason = "User converted to service account"
         for request in pending_requests:
             self.group_request_repository.cancel_user_request(request, reason, authorization)
             self.audit_log_service.log_user_group_request_status_change(

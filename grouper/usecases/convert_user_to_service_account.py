@@ -65,7 +65,9 @@ class ConvertUserToServiceAccount(object):
         else:
             authorization = Authorization(self.actor)
             with self.transaction_service.transaction():
-                self.group_request_service.cancel_all_requests_for_user(user, authorization)
+                self.group_request_service.cancel_all_requests_for_user(
+                    user, "User converted to service account", authorization
+                )
                 self.user_service.disable_user(user)
                 self.service_account_service.create_service_account_from_disabled_user(user)
                 self.service_account_service.enable_service_account(user, owner)

@@ -28,8 +28,8 @@ class GroupRequestInterface(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def cancel_all_requests_for_user(self, user, authorization):
-        # type: (str, Authorization) -> None
+    def cancel_all_requests_for_user(self, user, reason, authorization):
+        # type: (str, str, Authorization) -> None
         pass
 
 
