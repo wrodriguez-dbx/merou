@@ -4,7 +4,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from grouper import __version__
-from grouper.ctl import dump_sql, group, oneoff, service_account, shell, sync_db, user, user_proxy
+from grouper.ctl import dump_sql, group, oneoff, service_account, shell, sync_db, user_proxy
 from grouper.ctl.factory import CtlCommandFactory
 from grouper.plugin import initialize_plugins
 from grouper.plugin.exceptions import PluginsDirectoryDoesNotExist
@@ -54,7 +54,6 @@ def main(sys_argv=sys.argv, start_config_thread=True, session=None, graph=None):
         service_account,
         shell,
         sync_db,
-        user,
         user_proxy,
     ]:
         subcommand_module.add_parser(subparsers)  # type: ignore

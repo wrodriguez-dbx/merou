@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from grouper.ctl.permission import PermissionCommand
+from grouper.ctl.user import UserCommand
 from grouper.graph import Graph
 from grouper.models.base.session import get_db_engine, Session
 from grouper.repositories.factory import RepositoryFactory
@@ -66,14 +67,22 @@ class CtlCommandFactory(object):
         # type: (_SubParsersAction) -> None
         parser = subparsers.add_parser("permission", help="Manipulate permissions")
         PermissionCommand.add_arguments(parser)
+        parser = subparsers.add_parser("user", help="Manipulate users")
+        UserCommand.add_arguments(parser)
 
     def construct_command(self, command):
         # type: (str) -> CtlCommand
         if command == "permission":
             return self.construct_permission_command()
+        elif command == "user":
+            return self.construct_user_command()
         else:
             raise UnknownCommand("unknown command {}".format(command))
 
     def construct_permission_command(self):
         # type: () -> PermissionCommand
         return PermissionCommand(self.usecase_factory)
+
+    def construct_user_command(self):
+        # type: () -> UserCommand
+        return UserCommand(self.usecase_factory)
