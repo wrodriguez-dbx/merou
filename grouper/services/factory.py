@@ -25,8 +25,10 @@ class ServiceFactory(object):
 
     def create_group_request_service(self):
         # type: () -> GroupRequestInterface
+        audit_log_repository = self.repository_factory.create_audit_log_repository()
+        audit_log_service = AuditLogService(audit_log_repository)
         group_request_repository = self.repository_factory.create_group_request_repository()
-        return GroupRequestService(group_request_repository)
+        return GroupRequestService(group_request_repository, audit_log_service)
 
     def create_permission_service(self):
         # type: () -> PermissionInterface

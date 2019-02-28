@@ -1,6 +1,9 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from sqlalchemy.orm import aliased
+from sqlalchemy.sql import label
+
 from grouper.entities.group_request import UserGroupRequest
 from grouper.models.base.constants import OBJ_TYPES
 from grouper.models.comment import Comment
@@ -66,18 +69,28 @@ class GroupRequestRepository(object):
 
     def pending_requests_for_user(self, user):
         # type: (str) -> List[UserGroupRequest]
-        sql_requests = self.session.query(Request.id, User.username, Group.groupname).filter(
+        requester = aliased(User)
+        on_behalf_of = aliased(User)
+        sql_requests = self.session.query(
+            Request.id,
+            label("requester", requester.username),
+            Group.groupname,
+            label("on_behalf_of", on_behalf_of.username),
+        ).filter(
             Request.on_behalf_obj_type == OBJ_TYPES["User"],
-            Request.on_behalf_obj_pk == User.id,
+            Request.on_behalf_obj_pk == on_behalf_of.id,
+            Request.requester_id == requester.id,
             Request.requesting_id == Group.id,
             Request.status == "pending",
         )
+
         requests = []
         for sql_request in sql_requests:
             request = UserGroupRequest(
                 id=sql_request.id,
-                user=sql_request.username,
+                user=sql_request.on_behalf_of,
                 group=sql_request.groupname,
+                requester=sql_request.requester,
                 status=sql_request.status,
             )
             requests.append(request)
