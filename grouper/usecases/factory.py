@@ -6,6 +6,7 @@ from grouper.usecases.list_permissions import ListPermissions
 
 if TYPE_CHECKING:
     from grouper.models.base.session import Session
+    from grouper.usecases.convert_user_to_service_account import ConvertUserToServiceAccountUI
     from grouper.usecases.disable_permission import DisablePermissionUI
     from grouper.usecases.list_permissions import ListPermissionsUI
 
@@ -18,7 +19,7 @@ class UseCaseFactory(object):
         self.service_factory = service_factory
 
     def create_convert_user_to_service_account_usecase(self, actor, ui):
-        # type: (str, str) -> ConvertUserToServiceAccount
+        # type: (str, ConvertUserToServiceAccountUI) -> ConvertUserToServiceAccount
         user_service = self.service_factory.create_user_service()
         service_account_service = self.service_factory.create_service_account_service()
         group_request_service = self.service_factory.create_group_request_service()

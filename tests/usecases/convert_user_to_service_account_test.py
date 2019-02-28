@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING
 
-from mock import MagicMock
+from mock import call, MagicMock
 
 from grouper.constants import USER_ADMIN
+from grouper.models.user import User
 
 if TYPE_CHECKING:
     from tests.setup import SetupTest
@@ -23,5 +24,7 @@ def test_success(setup):
     assert mock_ui.mock_calls == [
         call.converted_user_to_service_account("service@a.co", "some-group")
     ]
-    assert is_service_account("service@a.co")
-    assert is_service_account_owned_by("service@a.co", "some-group")
+    service_account_user = User.get(setup.session, name="service@a.co")
+    assert service_account_user
+    assert service_account_user.is_service_account
+    assert service_account_user.service_account.owner.groupname == "some-group"

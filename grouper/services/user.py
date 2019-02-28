@@ -4,7 +4,8 @@ from grouper.constants import PERMISSION_ADMIN, PERMISSION_CREATE, USER_ADMIN
 from grouper.usecases.interfaces import UserInterface
 
 if TYPE_CHECKING:
-    from grouper.repositories.interfaces import PermissionGrantRepository, UserRepository
+    from grouper.repositories.interfaces import PermissionGrantRepository
+    from grouper.repositories.user import UserRepository
     from typing import List
 
 

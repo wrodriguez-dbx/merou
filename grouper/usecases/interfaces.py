@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from grouper.entities.permission import Permission
     from grouper.usecases.authorization import Authorization
     from grouper.usecases.list_permissions import ListPermissionsSortKey
-    from typing import ContextManager
+    from typing import ContextManager, List
 
 
 class GroupRequestInterface(object):
@@ -28,8 +28,8 @@ class GroupRequestInterface(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def cancel_all_requests_for_user(self, user):
-        # type: (str) -> None
+    def cancel_all_requests_for_user(self, user, authorization):
+        # type: (str, Authorization) -> None
         pass
 
 

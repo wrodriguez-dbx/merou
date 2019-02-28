@@ -2,9 +2,11 @@ from typing import TYPE_CHECKING
 
 from grouper.repositories.audit_log import AuditLogRepository
 from grouper.repositories.checkpoint import CheckpointRepository
+from grouper.repositories.group_request import GroupRequestRepository
 from grouper.repositories.permission import GraphPermissionRepository, SQLPermissionRepository
 from grouper.repositories.permission_grant import GraphPermissionGrantRepository
 from grouper.repositories.transaction import TransactionRepository
+from grouper.repositories.user import UserRepository
 
 if TYPE_CHECKING:
     from grouper.graph import GroupGraph
@@ -28,6 +30,10 @@ class RepositoryFactory(object):
         # type: () -> CheckpointRepository
         return CheckpointRepository(self.session)
 
+    def create_group_request_repository(self):
+        # type: () -> GroupRequestRepository
+        return GroupRequestRepository(self.session)
+
     def create_permission_repository(self):
         # type: () -> PermissionRepository
         sql_permission_repository = SQLPermissionRepository(self.session)
@@ -40,3 +46,7 @@ class RepositoryFactory(object):
     def create_transaction_repository(self):
         # type: () -> TransactionRepository
         return TransactionRepository(self.session)
+
+    def create_user_repository(self):
+        # type: () -> UserRepository
+        return UserRepository(self.session)
