@@ -49,4 +49,4 @@ class RepositoryFactory(object):
 
     def create_user_repository(self):
         # type: () -> UserRepository
-        return UserRepository(self.session)
+        return GraphUserRepository(self.session, self.graph)

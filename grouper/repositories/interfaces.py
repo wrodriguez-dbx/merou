@@ -31,7 +31,7 @@ class PermissionRepository(object):
 
 
 class PermissionGrantRepository(object):
-    """Abstract base class for permission grants."""
+    """Abstract base class for permission grant repositories."""
 
     __metaclass__ = ABCMeta
 
@@ -43,4 +43,20 @@ class PermissionGrantRepository(object):
     @abstractmethod
     def user_has_permission(self, user, permission):
         # type: (str, str) -> bool
+        pass
+
+
+class UserRepository(object):
+    """Abstract base class for user repositories."""
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def disable_user(self, user):
+        # type: (str) -> None
+        pass
+
+    @abstractmethod
+    def groups_of_user(self, user):
+        # type: (str) -> List[str]
         pass

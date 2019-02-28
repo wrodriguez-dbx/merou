@@ -37,6 +37,11 @@ class ServiceFactory(object):
         permission_repository = self.repository_factory.create_permission_repository()
         return PermissionService(audit_log_service, permission_repository)
 
+    def create_service_account_service(self):
+        # type: () -> ServiceAccountInterface
+        service_account_repository = self.repository_factory.create_service_account_repository()
+        return ServiceAccountService(service_account_repository)
+
     def create_transaction_service(self):
         # type: () -> TransactionInterface
         transaction_repository = self.repository_factory.create_transaction_repository()
