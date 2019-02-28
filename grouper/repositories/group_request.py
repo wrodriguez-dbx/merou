@@ -40,8 +40,8 @@ class GroupRequestRepository(object):
         # type: (Session) -> None
         self.session = session
 
-    def cancel_user_request(self, request, authorization):
-        # type: (UserGroupRequest, Authorization) -> None
+    def cancel_user_request(self, request, reason, authorization):
+        # type: (UserGroupRequest, str, Authorization) -> None
         now = datetime.utcnow()
         request = Request.get(self.session, request.id)
         if not request:
@@ -63,7 +63,7 @@ class GroupRequestRepository(object):
             obj_type=OBJ_TYPES["RequestStatusChange"],
             obj_pk=request_status_change.id,
             user_id=actor.id,
-            comment="User converted to service account",
+            comment=reason,
             created_on=now,
         ).add(self.session)
 
