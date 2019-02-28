@@ -17,15 +17,15 @@ class UseCaseFactory(object):
         # type: (Session) -> None
         self.service_factory = service_factory
 
-    def create_convert_user_to_service_account(self, user, owner):
+    def create_convert_user_to_service_account_usecase(self, actor, ui):
         # type: (str, str) -> ConvertUserToServiceAccount
         user_service = self.service_factory.create_user_service()
         service_account_service = self.service_factory.create_service_account_service()
         group_request_service = self.service_factory.create_group_request_service()
         transaction_service = self.service_factory.create_transaction_service()
         return ConvertUserToServiceAccount(
-            user,
-            owner,
+            actor,
+            ui,
             user_service,
             service_account_service,
             group_request_service,
