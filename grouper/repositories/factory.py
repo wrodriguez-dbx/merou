@@ -5,13 +5,22 @@ from grouper.repositories.checkpoint import CheckpointRepository
 from grouper.repositories.group_request import GroupRequestRepository
 from grouper.repositories.permission import GraphPermissionRepository, SQLPermissionRepository
 from grouper.repositories.permission_grant import GraphPermissionGrantRepository
+from grouper.repositories.service_account import (
+    GraphServiceAccountRepository,
+    SQLServiceAccountRepository,
+)
 from grouper.repositories.transaction import TransactionRepository
-from grouper.repositories.user import UserRepository
+from grouper.repositories.user import GraphUserRepository, SQLUserRepository
 
 if TYPE_CHECKING:
     from grouper.graph import GroupGraph
     from grouper.models.base.session import Session
-    from grouper.repositories.interfaces import PermissionRepository, PermissionGrantRepository
+    from grouper.repositories.interfaces import (
+        PermissionRepository,
+        PermissionGrantRepository,
+        ServiceAccountRepository,
+        UserRepository,
+    )
 
 
 class RepositoryFactory(object):
@@ -43,10 +52,17 @@ class RepositoryFactory(object):
         # type: () -> PermissionGrantRepository
         return GraphPermissionGrantRepository(self.graph)
 
+    def create_service_account_repository(self):
+        # type: () -> ServiceAccountRepository
+        user_repository = SQLUserRepository(self.session)
+        sql_service_account_repository = SQLServiceAccountRepository(self.session, user_repository)
+        return GraphServiceAccountRepository(self.graph, sql_service_account_repository)
+
     def create_transaction_repository(self):
         # type: () -> TransactionRepository
         return TransactionRepository(self.session)
 
     def create_user_repository(self):
         # type: () -> UserRepository
-        return GraphUserRepository(self.session, self.graph)
+        sql_user_repository = SQLUserRepository(self.session)
+        return GraphUserRepository(self.graph, sql_user_repository)
