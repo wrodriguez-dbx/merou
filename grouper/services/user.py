@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from grouper.repositories.interfaces import PermissionGrantRepository
     from grouper.repositories.user import UserRepository
     from grouper.services.audit_log import AuditLogService
+    from grouper.usecases.authorization import Authorization
     from typing import List
 
 
@@ -19,9 +20,10 @@ class UserService(UserInterface):
         self.permission_grant_repository = permission_grant_repository
         self.audit_log = audit_log_service
 
-    def disable_user(self, user):
-        # type: (str) -> None
-        return self.user_repository.disable_user(user)
+    def disable_user(self, user, authorization):
+        # type: (str, Authorization) -> None
+        self.user_repository.disable_user(user)
+        self.audit_log.log_disable_user(user, authorization)
 
     def groups_of_user(self, user):
         # type: (str) -> List[str]

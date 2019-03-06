@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from grouper.repositories.audit_log import AuditLogRepository
 from grouper.repositories.checkpoint import CheckpointRepository
+from grouper.repositories.group_edge import GraphGroupEdgeRepository, SQLGroupEdgeRepository
 from grouper.repositories.group_request import GroupRequestRepository
 from grouper.repositories.permission import GraphPermissionRepository, SQLPermissionRepository
 from grouper.repositories.permission_grant import GraphPermissionGrantRepository
@@ -39,6 +40,10 @@ class RepositoryFactory(object):
         # type: () -> CheckpointRepository
         return CheckpointRepository(self.session)
 
+    def create_group_edge_repository(self):
+        sql_group_edge_repository = SQLGroupEdgeRepository(self.session)
+        return GraphGroupEdgeRepository(self.graph, sql_group_edge_repository)
+
     def create_group_request_repository(self):
         # type: () -> GroupRequestRepository
         return GroupRequestRepository(self.session)
@@ -54,7 +59,15 @@ class RepositoryFactory(object):
 
     def create_service_account_repository(self):
         # type: () -> ServiceAccountRepository
-        user_repository = SQLUserRepository(self.session)
+        sql_group_edge_repository = SQLGroupEdgeRepository(self.session)
+        group_edge_repository = GraphGroupEdgeRepository(self.graph, sql_group_edge_repository)
+
+        sql_user_repository = SQLUserRepository(self.session)
+        user_repository = GraphUserRepository(
+            self.graph,
+            sql_user_repository,
+            group_edge_repository)
+        
         sql_service_account_repository = SQLServiceAccountRepository(self.session, user_repository)
         return GraphServiceAccountRepository(self.graph, sql_service_account_repository)
 
@@ -65,4 +78,6 @@ class RepositoryFactory(object):
     def create_user_repository(self):
         # type: () -> UserRepository
         sql_user_repository = SQLUserRepository(self.session)
-        return GraphUserRepository(self.graph, sql_user_repository)
+        sql_group_edge_repository = SQLGroupEdgeRepository(self.session)
+        group_edge_repository = GraphGroupEdgeRepository(self.graph, sql_group_edge_repository)
+        return GraphUserRepository(self.graph, sql_user_repository, group_edge_repository)

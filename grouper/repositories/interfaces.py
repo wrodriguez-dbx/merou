@@ -9,6 +9,26 @@ if TYPE_CHECKING:
     from typing import List, Optional
 
 
+class GroupEdgeRepository(object):
+    """Abstract base class for group edge repositories.class
+
+    WARNING: This repository should only be used from other repositories.
+    See repositories/group_edge.py for more details.
+    """
+
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def add_user_to_group(self, username, groupname, role):
+        # type: (str, str, str) -> None
+        pass
+
+    @abstractmethod
+    def groups_of_user(self, username):
+        # type: (str) -> List[str]
+        pass
+
+
 class PermissionRepository(object):
     """Abstract base class for permission repositories."""
 
@@ -78,8 +98,8 @@ class UserRepository(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def add_user_to_group(self, username, groupname):
-        # type: (str, str) -> None
+    def add_user_to_group(self, username, groupname, role):
+        # type: (str, str, str) -> None
         pass
 
     @abstractmethod

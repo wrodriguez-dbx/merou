@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING
 
 from grouper.entities.service_account import ServiceAccountNotFoundException
+from grouper.models.group import Group
+from grouper.models.group_service_accounts import GroupServiceAccount
 from grouper.models.service_account import ServiceAccount as SQLServiceAccount
 from grouper.repositories.interfaces import UserRepository, ServiceAccountRepository
 
@@ -38,16 +40,23 @@ class SQLServiceAccountRepository(ServiceAccountRepository):
     def __init__(self, session, user_repository):
         # type: (Session, UserRepository) -> None
         self.session = session
-        self.user_repository = repository
+        self.user_repository = user_repository
 
-    def assign_service_account_to_group(self, username, groupname):
+    def assign_service_account_to_group(self, name, groupname):
         # type: (str, str) -> None
-        # NOTE: The fact that we have this check that the service account exists and then
-        # never use it is an artifact of the user and service account repositories being the same.user_repository
-        # It can be fixed once the two repositories are properly separate.
-        if not SQLServiceAccount.get(self.session, name=name)
+        service_account = SQLServiceAccount.get(self.session, name=name)
+        if not service_account:
             raise ServiceAccountNotFoundException(name)
-        return self.user_repository.add_user_to_group(username, groupname)
+
+        group = Group.get(self.session, name=groupname)
+        if not group:
+            raise ServiceAccountNotFoundException(groupname) # TODO(wrodriguez)
+
+        group_service_account = GroupServiceAccount(
+            group_id=group.id,
+            service_account_id=service_account.id,
+        )
+        group_service_account.add(self.session)
 
     def enable_service_account(self, name):
         # type: (str) -> None
@@ -57,7 +66,7 @@ class SQLServiceAccountRepository(ServiceAccountRepository):
         service_account = SQLServiceAccount.get(self.session, name=name)
         if not service_account:
             raise ServiceAccountNotFoundException(name)
-        return self.user_repository.enable_user(username)
+        return self.user_repository.enable_user(name)
 
     def set_service_account_description(self, name, description):
         # type: (str, str) -> None
@@ -71,4 +80,4 @@ class SQLServiceAccountRepository(ServiceAccountRepository):
         service_account = SQLServiceAccount.get(self.session, name=name)
         if not service_account:
             raise ServiceAccountNotFoundException(name)
-        service_account.mdbset = mdbset
+        service_account.machine_set = mdbset

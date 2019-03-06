@@ -6,6 +6,7 @@ if TYPE_CHECKING:
     from grouper.repositories.interfaces import UserRepository, ServiceAccountRepository
     from grouper.repositories.group_request import GroupRequestRepository
     from grouper.services.audit_log import AuditLogService
+    from grouper.usecases.authorization import Authorization
 
 class ServiceAccountService(ServiceAccountInterface):
     """High-level logic to manipulate service accounts."""
@@ -23,8 +24,8 @@ class ServiceAccountService(ServiceAccountInterface):
         self.group_request_repository = group_request_repository
         self.audit_log = audit_log_service
 
-    def create_service_account_from_disabled_user(self, user):
-        # type: (str) -> None
+    def create_service_account_from_disabled_user(self, user, authorization):
+        # type: (str, Authorization) -> None
         assert self.user_repository.groups_of_user(user) == []
         assert self.group_request_repository.pending_requests_for_user(user) == []
 
@@ -36,7 +37,11 @@ class ServiceAccountService(ServiceAccountInterface):
         self.service_account_repository.set_service_account_description(user, "")
         self.service_account_repository.set_service_account_mdbset(user, "")
 
-    def enable_service_account(self, user, owner):
-        # type: (str, str) -> None
+        self.audit_log.log_create_service_account_from_disabled_user(user, authorization)
+
+    def enable_service_account(self, user, owner, authorization):
+        # type: (str, str, Authorization) -> None
         self.service_account_repository.assign_service_account_to_group(user, owner)
         self.service_account_repository.enable_service_account(user)
+
+        self.audit_log.log_enable_service_account(user, owner, authorization)

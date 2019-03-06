@@ -3,6 +3,9 @@ from typing import TYPE_CHECKING
 from mock import call, MagicMock
 
 from grouper.constants import USER_ADMIN
+from grouper.models.group import Group
+from grouper.models.group_service_accounts import GroupServiceAccount
+from grouper.models.service_account import ServiceAccount
 from grouper.models.user import User
 
 if TYPE_CHECKING:
@@ -27,4 +30,17 @@ def test_success(setup):
     service_account_user = User.get(setup.session, name="service@a.co")
     assert service_account_user
     assert service_account_user.is_service_account
-    assert service_account_user.service_account.owner.groupname == "some-group"
+    assert service_account_user.enabled
+
+    service_account = ServiceAccount.get(setup.session, name="service@a.co")
+    assert service_account
+    assert service_account.description == ""
+    assert service_account.machine_set == ""
+
+    group = Group.get(setup.session, name="some-group")
+    group_service_account = GroupServiceAccount.get(
+        setup.session,
+        service_account_id=service_account.id)
+    assert group
+    assert group_service_account
+    assert group_service_account.group_id == group.id

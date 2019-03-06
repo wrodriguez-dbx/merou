@@ -60,13 +60,13 @@ class ServiceAccountInterface(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def create_service_account_from_disabled_user(self, user):
-        # type: (str) -> None
+    def create_service_account_from_disabled_user(self, user, authorization):
+        # type: (str, Authorization) -> None
         pass
 
     @abstractmethod
-    def enable_service_account(self, user, owner):
-        # type: (str, str) -> None
+    def enable_service_account(self, user, owner, authorization):
+        # type: (str, str, Authorization) -> None
         pass
 
 
@@ -86,8 +86,8 @@ class UserInterface(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def disable_user(self, user):
-        # type: (str) -> None
+    def disable_user(self, user, authorization):
+        # type: (str, Authorization) -> None
         pass
 
     @abstractmethod

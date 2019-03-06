@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from grouper.services.audit_log import AuditLogService
 from grouper.services.group_request import GroupRequestService
 from grouper.services.permission import PermissionService
+from grouper.services.service_account import ServiceAccountService
 from grouper.services.transaction import TransactionService
 from grouper.services.user import UserService
 
@@ -11,6 +12,7 @@ if TYPE_CHECKING:
     from grouper.usecases.interfaces import (
         GroupRequestInterface,
         PermissionInterface,
+        ServiceAccountInterface,
         TransactionInterface,
         UserInterface,
     )
@@ -39,12 +41,15 @@ class ServiceFactory(object):
 
     def create_service_account_service(self):
         # type: () -> ServiceAccountInterface
-        user_repository = self.repository_factory.create_service_account_repository()
+        audit_log_repository = self.repository_factory.create_audit_log_repository()
+        audit_log_service = AuditLogService(audit_log_repository)
+        user_repository = self.repository_factory.create_user_repository()
         service_account_repository = self.repository_factory.create_service_account_repository()
         group_request_repository = self.repository_factory.create_group_request_repository()
         return ServiceAccountService(user_repository,
                                      service_account_repository,
-                                     group_request_repository)
+                                     group_request_repository,
+                                     audit_log_service)
 
     def create_transaction_service(self):
         # type: () -> TransactionInterface
@@ -54,6 +59,8 @@ class ServiceFactory(object):
 
     def create_user_service(self):
         # type: () -> UserInterface
+        audit_log_repository = self.repository_factory.create_audit_log_repository()
+        audit_log_service = AuditLogService(audit_log_repository)
         user_repository = self.repository_factory.create_user_repository()
         permission_grant_repository = self.repository_factory.create_permission_grant_repository()
-        return UserService(user_repository, permission_grant_repository)
+        return UserService(user_repository, permission_grant_repository, audit_log_service)
