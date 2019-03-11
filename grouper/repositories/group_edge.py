@@ -1,10 +1,5 @@
 from typing import TYPE_CHECKING
 
-from grouper.group_member import persist_group_member_changes
-from grouper.models.base.constants import OBJ_TYPES
-from grouper.models.group import Group
-from grouper.models.group_edge import GroupEdge, GROUP_EDGE_ROLES
-from grouper.models.user import User
 from grouper.repositories.interfaces import GroupEdgeRepository
 
 if TYPE_CHECKING:
@@ -12,13 +7,6 @@ if TYPE_CHECKING:
     from grouper.models.base.session import Session
     from typing import List
 
-class UnknownGroupException(Exception):
-    """Group involved in a logged action does not exist."""
-    pass
-
-class UnknownUserException(Exception):
-    """User involved in a logged action does not exist."""
-    pass
 
 class GraphGroupEdgeRepository(GroupEdgeRepository):
     """Graph-aware storage layer for group edges.group
@@ -37,12 +25,12 @@ class GraphGroupEdgeRepository(GroupEdgeRepository):
 
     def add_user_to_group(self, username, groupname, role):
         # type: (str, str, str) -> None
-        return self.repository.add_user_to_group(username, groupname, role)
+        raise NotImplementedError()
 
     def groups_of_user(self, username):
         # type: (str) -> List[str]
         user_details = self.graph.get_user_details(username)
-        return [group["name"] for group in user_details["groups"]]
+        return [group for group in user_details["groups"]]
 
 
 class SQLGroupEdgeRepository(GroupEdgeRepository):
@@ -61,35 +49,8 @@ class SQLGroupEdgeRepository(GroupEdgeRepository):
 
     def add_user_to_group(self, username, groupname, role):
         # type: (str, str, str) -> None
-        group_id = self._id_for_group(groupname)
-        member_type = OBJ_TYPES["User"]
-        member_id = self._id_for_user(username)
-        role_index = GROUP_EDGE_ROLES.index(role)
-
-        edge = GroupEdge(
-            group_id=group_id,
-            member_type=member_type,
-            member_pk=member_id,
-            expiration=None,
-            active=True,
-            _role=role_index,
-        )
-        edge.add(self.session)
+        raise NotImplementedError()
 
     def groups_of_user(self, username):
         # type: (str) -> List[str]
         raise NotImplementedError()
-
-    def _id_for_group(self, groupname):
-        # type: (str) -> int
-        group_obj = Group.get(self.session, name=groupname)
-        if not group_obj:
-            raise UnknownGroupException("unknown group {}".format(groupname))
-        return group_obj.id
-
-    def _id_for_user(self, username):
-        # type: (str) -> int
-        user_obj = User.get(self.session, name=username)
-        if not user_obj:
-            raise UnknownUserException("unknown user {}".format(username))
-        return user_obj.id

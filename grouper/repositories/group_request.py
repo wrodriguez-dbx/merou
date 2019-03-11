@@ -40,32 +40,17 @@ class GroupRequestRepository(object):
         # type: (Session) -> None
         self.session = session
 
-    def cancel_user_request(self, request, reason, authorization):
+    def cancel_user_request(self, user_request, reason, authorization):
         # type: (UserGroupRequest, str, Authorization) -> None
         now = datetime.utcnow()
-        request = Request.get(self.session, request.id)
+        request = Request.get(self.session, id=user_request.id)
         if not request:
             raise UnknownUserGroupRequestException(request)
         actor = User.get(self.session, name=authorization.actor)
         if not actor:
             raise UnknownUserException("Unknown user {}".format(authorization.actor))
 
-        request_status_change = RequestStatusChange(
-            request=request,
-            user_id=actor.id,
-            from_status=request.status.value,
-            to_status="cancelled",
-            change_at=now,
-        ).add(self.session)
-        self.session.flush()
-
-        Comment(
-            obj_type=OBJ_TYPES["RequestStatusChange"],
-            obj_pk=request_status_change.id,
-            user_id=actor.id,
-            comment=reason,
-            created_on=now,
-        ).add(self.session)
+        request.update_status(actor, "cancelled", reason)
 
     def pending_requests_for_user(self, user):
         # type: (str) -> List[UserGroupRequest]
@@ -73,6 +58,7 @@ class GroupRequestRepository(object):
         on_behalf_of = aliased(User)
         sql_requests = self.session.query(
             Request.id,
+            Request.status,
             label("requester", requester.username),
             Group.groupname,
             label("on_behalf_of", on_behalf_of.username),

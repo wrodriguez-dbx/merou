@@ -62,11 +62,13 @@ class RepositoryFactory(object):
         sql_group_edge_repository = SQLGroupEdgeRepository(self.session)
         group_edge_repository = GraphGroupEdgeRepository(self.graph, sql_group_edge_repository)
 
-        sql_user_repository = SQLUserRepository(self.session)
-        user_repository = GraphUserRepository(
-            self.graph,
-            sql_user_repository,
-            group_edge_repository)
+        group_request_repository = GroupRequestRepository(self.session)
+
+        sql_user_repository = SQLUserRepository(
+            self.session,
+            group_edge_repository,
+            group_request_repository) 
+        user_repository = GraphUserRepository(self.graph, sql_user_repository)
         
         sql_service_account_repository = SQLServiceAccountRepository(self.session, user_repository)
         return GraphServiceAccountRepository(self.graph, sql_service_account_repository)
@@ -77,7 +79,13 @@ class RepositoryFactory(object):
 
     def create_user_repository(self):
         # type: () -> UserRepository
-        sql_user_repository = SQLUserRepository(self.session)
         sql_group_edge_repository = SQLGroupEdgeRepository(self.session)
         group_edge_repository = GraphGroupEdgeRepository(self.graph, sql_group_edge_repository)
-        return GraphUserRepository(self.graph, sql_user_repository, group_edge_repository)
+
+        group_request_repository = GroupRequestRepository(self.session)
+
+        sql_user_repository = SQLUserRepository(
+            self.session,
+            group_edge_repository,
+            group_request_repository) 
+        return GraphUserRepository(self.graph, sql_user_repository)

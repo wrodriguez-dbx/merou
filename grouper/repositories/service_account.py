@@ -1,6 +1,10 @@
 from typing import TYPE_CHECKING
 
-from grouper.entities.service_account import ServiceAccountNotFoundException
+from grouper.entities.group import GroupNotFoundException
+from grouper.entities.service_account import (
+    ServiceAccountNotFoundException,
+    ServiceAccountHasOwnerException,
+)
 from grouper.models.group import Group
 from grouper.models.group_service_accounts import GroupServiceAccount
 from grouper.models.service_account import ServiceAccount as SQLServiceAccount
@@ -50,7 +54,13 @@ class SQLServiceAccountRepository(ServiceAccountRepository):
 
         group = Group.get(self.session, name=groupname)
         if not group:
-            raise ServiceAccountNotFoundException(groupname) # TODO(wrodriguez)
+            raise GroupNotFoundException(groupname)
+
+        existing_relationship = GroupServiceAccount.get(
+            self.session,
+            service_account_id=service_account.id)
+        if existing_relationship:
+            raise ServiceAccountHasOwnerException(name, existing_relationship.group_id)
 
         group_service_account = GroupServiceAccount(
             group_id=group.id,
@@ -61,7 +71,7 @@ class SQLServiceAccountRepository(ServiceAccountRepository):
     def enable_service_account(self, name):
         # type: (str) -> None
         # NOTE: The fact that we have this check that the service account exists and then
-        # never use it is an artifact of the user and service account repositories being the same.user_repository
+        # never use it is an artifact of service accounts being built on top of users.
         # It can be fixed once the two repositories are properly separate.
         service_account = SQLServiceAccount.get(self.session, name=name)
         if not service_account:

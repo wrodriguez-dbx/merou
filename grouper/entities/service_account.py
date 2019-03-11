@@ -17,3 +17,11 @@ class ServiceAccountNotFoundException(Exception):
         # type: (str) -> None
         msg = "Service account {} not found".format(name)
         super(ServiceAccountNotFoundException, self).__init__(msg)
+
+class ServiceAccountHasOwnerException(Exception):
+    """Attempt to add owner to a service account that already has an owner."""
+
+    def __init__(self, name, group_id):
+        # type: (str, int) -> None
+        msg = "Service account {} already has an owner (id {})".format(name, group_id)
+        super(ServiceAccountHasOwnerException, self).__init__(msg)

@@ -27,7 +27,7 @@ class ServiceAccountService(ServiceAccountInterface):
     def create_service_account_from_disabled_user(self, user, authorization):
         # type: (str, Authorization) -> None
         assert self.user_repository.groups_of_user(user) == []
-        assert self.group_request_repository.pending_requests_for_user(user) == []
+        assert self.group_request_repository.pending_requests_for_user(user) == [] # TODO(wrodriguez)
 
         # WARNING: This logic relies on the fact that the user and service account repos
         # are in fact the same thing, as it never explicitly removes the user from the

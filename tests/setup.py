@@ -147,3 +147,20 @@ class SetupTest(object):
             permission_id=permission_obj.id, group_id=group_obj.id, argument=argument
         )
         grant.add(self.session)
+
+    def create_group_request(self, user, group, role="member"):
+        # type: (str, str, str) -> None
+        self.create_user(user)
+        self.create_group(group)
+
+        user_obj = User.get(self.session, name=user)
+        assert user_obj
+        group_obj = Group.get(self.session, name=group)
+        assert group_obj
+
+        group_obj.add_member(
+            requester=user_obj,
+            user_or_group=user_obj,
+            reason="",
+            role=role
+        )
