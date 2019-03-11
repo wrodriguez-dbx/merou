@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from typing import List, Optional
 
 
-
 class UnknownPermissionException(Exception):
     """Permission involved in a logged action does not exist."""
 

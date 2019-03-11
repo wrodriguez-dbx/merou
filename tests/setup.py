@@ -158,9 +158,4 @@ class SetupTest(object):
         group_obj = Group.get(self.session, name=group)
         assert group_obj
 
-        group_obj.add_member(
-            requester=user_obj,
-            user_or_group=user_obj,
-            reason="",
-            role=role
-        )
+        group_obj.add_member(requester=user_obj, user_or_group=user_obj, reason="", role=role)

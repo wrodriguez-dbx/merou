@@ -69,6 +69,8 @@ class ConvertUserToServiceAccount(object):
                     user, "User converted to service account", authorization
                 )
                 self.user_service.disable_user(user, authorization)
-                self.service_account_service.create_service_account_from_disabled_user(user, authorization)
+                self.service_account_service.create_service_account_from_disabled_user(
+                    user, authorization
+                )
                 self.service_account_service.enable_service_account(user, owner, authorization)
             self.ui.converted_user_to_service_account(user, owner)

@@ -1,14 +1,10 @@
 from typing import NamedTuple
 
 ServiceAccount = NamedTuple(
-    "ServiceAccount", [
-        ("id", int),
-        ("name", str),
-        ("enabled", bool),
-        ("description", str),
-        ("machine_set", str)
-    ]
+    "ServiceAccount",
+    [("id", int), ("name", str), ("enabled", bool), ("description", str), ("machine_set", str)],
 )
+
 
 class ServiceAccountNotFoundException(Exception):
     """Attempt to operate on a service account not found in the storage layer."""
@@ -17,6 +13,7 @@ class ServiceAccountNotFoundException(Exception):
         # type: (str) -> None
         msg = "Service account {} not found".format(name)
         super(ServiceAccountNotFoundException, self).__init__(msg)
+
 
 class ServiceAccountHasOwnerException(Exception):
     """Attempt to add owner to a service account that already has an owner."""

@@ -1,8 +1,7 @@
 from typing import NamedTuple
 
-User = NamedTuple(
-    "User", [("id", int), ("username", str), ("enabled", bool)]
-)
+User = NamedTuple("User", [("id", int), ("username", str), ("enabled", bool)])
+
 
 class UserNotFoundException(Exception):
     """Attempt to operate on a user not found in the storage layer."""

@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from grouper.graph import GroupGraph
     from grouper.models.base.session import Session
 
+
 class GraphServiceAccountRepository(ServiceAccountRepository):
     """Graph-aware storage layer for service accounts."""
 
@@ -38,6 +39,7 @@ class GraphServiceAccountRepository(ServiceAccountRepository):
         # type: (str, str) -> None
         return self.repository.set_service_account_mdbset(name, mdbset)
 
+
 class SQLServiceAccountRepository(ServiceAccountRepository):
     """SQL storage layer for service accounts."""
 
@@ -57,14 +59,13 @@ class SQLServiceAccountRepository(ServiceAccountRepository):
             raise GroupNotFoundException(groupname)
 
         existing_relationship = GroupServiceAccount.get(
-            self.session,
-            service_account_id=service_account.id)
+            self.session, service_account_id=service_account.id
+        )
         if existing_relationship:
             raise ServiceAccountHasOwnerException(name, existing_relationship.group_id)
 
         group_service_account = GroupServiceAccount(
-            group_id=group.id,
-            service_account_id=service_account.id,
+            group_id=group.id, service_account_id=service_account.id
         )
         group_service_account.add(self.session)
 

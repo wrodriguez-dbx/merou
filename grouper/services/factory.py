@@ -46,10 +46,12 @@ class ServiceFactory(object):
         user_repository = self.repository_factory.create_user_repository()
         service_account_repository = self.repository_factory.create_service_account_repository()
         group_request_repository = self.repository_factory.create_group_request_repository()
-        return ServiceAccountService(user_repository,
-                                     service_account_repository,
-                                     group_request_repository,
-                                     audit_log_service)
+        return ServiceAccountService(
+            user_repository,
+            service_account_repository,
+            group_request_repository,
+            audit_log_service,
+        )
 
     def create_transaction_service(self):
         # type: () -> TransactionInterface

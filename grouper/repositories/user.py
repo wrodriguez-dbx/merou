@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from grouper.repositories.interfaces import GroupEdgeRepository
     from typing import List
 
+
 class UserIsMemberOfGroupsException(Exception):
     """Operation failed because user is a member of groups."""
 
@@ -20,6 +21,7 @@ class UserIsMemberOfGroupsException(Exception):
         msg = "User {} is a member of one or more groups".format(username)
         super(UserIsMemberOfGroupsException, self).__init__(msg)
 
+
 class UserHasPendingRequestsException(Exception):
     """Operation failed because user has pending requests."""
 
@@ -27,6 +29,7 @@ class UserHasPendingRequestsException(Exception):
         # type: (str) -> None
         msg = "User {} has one or more pending requests".format(username)
         super(UserHasPendingRequestsException, self).__init__(msg)
+
 
 class GraphUserRepository(UserRepository):
     """Graph-aware storage layer for users."""
@@ -55,6 +58,7 @@ class GraphUserRepository(UserRepository):
     def mark_disabled_user_as_service_account(self, username):
         # type: (str) -> None
         return self.repository.mark_disabled_user_as_service_account(username)
+
 
 class SQLUserRepository(UserRepository):
     """SQL storage layer for users."""
@@ -101,10 +105,7 @@ class SQLUserRepository(UserRepository):
         if self.group_request_repository.pending_requests_for_user(username) != []:
             raise UserHasPendingRequestsException(username)
 
-        service_account = SQLServiceAccount(
-            user_id=user.id,
-        )
+        service_account = SQLServiceAccount(user_id=user.id)
         service_account.add(self.session)
 
         user.is_service_account = True
-

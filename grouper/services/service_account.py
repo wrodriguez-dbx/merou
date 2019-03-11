@@ -8,16 +8,17 @@ if TYPE_CHECKING:
     from grouper.services.audit_log import AuditLogService
     from grouper.usecases.authorization import Authorization
 
+
 class ServiceAccountService(ServiceAccountInterface):
     """High-level logic to manipulate service accounts."""
 
     def __init__(
-                    self,
-                    user_repository,  # type: UserRepository
-                    service_account_repository,  # type: ServiceAccountRepository
-                    group_request_repository,  # type: GroupRequestRepository
-                    audit_log_service,  # type: AuditLogService
-                ):
+        self,
+        user_repository,  # type: UserRepository
+        service_account_repository,  # type: ServiceAccountRepository
+        group_request_repository,  # type: GroupRequestRepository
+        audit_log_service,  # type: AuditLogService
+    ):
         # type: (...) -> None
         self.user_repository = user_repository
         self.service_account_repository = service_account_repository
@@ -26,8 +27,6 @@ class ServiceAccountService(ServiceAccountInterface):
 
     def create_service_account_from_disabled_user(self, user, authorization):
         # type: (str, Authorization) -> None
-        assert self.user_repository.groups_of_user(user) == []
-        assert self.group_request_repository.pending_requests_for_user(user) == [] # TODO(wrodriguez)
 
         # WARNING: This logic relies on the fact that the user and service account repos
         # are in fact the same thing, as it never explicitly removes the user from the
