@@ -158,4 +158,8 @@ class SetupTest(object):
         group_obj = Group.get(self.session, name=group)
         assert group_obj
 
-        group_obj.add_member(requester=user_obj, user_or_group=user_obj, reason="", role=role)
+        # Note: despite the function name, this only creates the request. The flow here is
+        # convoluted enough that it seems best to preserve exact behavior for testing.
+        group_obj.add_member(
+            requester=user_obj, user_or_group=user_obj, reason="", status="pending", role=role
+        )
