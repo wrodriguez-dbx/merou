@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import label
 
-from grouper.entities.group_request import UserGroupRequest
+from grouper.entities.group_request import UserGroupRequest, UserGroupRequestNotFoundException
+from grouper.entities.user import UserNotFoundException
 from grouper.models.base.constants import OBJ_TYPES
 from grouper.models.comment import Comment
 from grouper.models.group import Group
@@ -16,21 +17,6 @@ if TYPE_CHECKING:
     from grouper.models.base.session import Session
     from grouper.usecases.authorization import Authorization
     from typing import List
-
-
-class UnknownUserGroupRequestException(Exception):
-    """Request being updated does not exist."""
-
-    def __init__(self, request):
-        # type: (UserGroupRequest) -> None
-        msg = "Group membership request {} not found".format(request.id)
-        super(UnknownUserGroupRequestException, self).__init__(msg)
-
-
-class UnknownUserException(Exception):
-    """User processing a request does not exist."""
-
-    pass
 
 
 class GroupRequestRepository(object):
@@ -45,12 +31,29 @@ class GroupRequestRepository(object):
         now = datetime.utcnow()
         request = Request.get(self.session, id=user_request.id)
         if not request:
-            raise UnknownUserGroupRequestException(request)
+            raise UserGroupRequestNotFoundException(request)
         actor = User.get(self.session, name=authorization.actor)
         if not actor:
-            raise UnknownUserException("Unknown user {}".format(authorization.actor))
+            raise UserNotFoundException(authorization.actor)
 
-        request.update_status(actor, "cancelled", reason)
+        request_status_change = RequestStatusChange(
+            request=request,
+            user_id=actor.id,
+            from_status=request.status,
+            to_status="cancelled",
+            change_at=now,
+        ).add(self.session)
+
+        request.status = "cancelled"
+        self.session.flush()
+
+        Comment(
+            obj_type=OBJ_TYPES["RequestStatusChange"],
+            obj_pk=request_status_change.id,
+            user_id=actor.id,
+            comment=reason,
+            created_on=now,
+        ).add(self.session)
 
     def pending_requests_for_user(self, user):
         # type: (str) -> List[UserGroupRequest]

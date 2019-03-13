@@ -1,52 +1,24 @@
 from typing import TYPE_CHECKING
 
 from grouper.entities.group import GroupNotFoundException
-from grouper.entities.service_account import (
-    ServiceAccountNotFoundException,
-    ServiceAccountHasOwnerException,
-)
+from grouper.entities.service_account import ServiceAccountNotFoundException
+from grouper.entities.user import UserNotFoundException
 from grouper.models.group import Group
 from grouper.models.group_service_accounts import GroupServiceAccount
 from grouper.models.service_account import ServiceAccount as SQLServiceAccount
-from grouper.repositories.interfaces import UserRepository, ServiceAccountRepository
+from grouper.models.user import User as SQLUser
 
 if TYPE_CHECKING:
     from grouper.graph import GroupGraph
     from grouper.models.base.session import Session
 
 
-class GraphServiceAccountRepository(ServiceAccountRepository):
-    """Graph-aware storage layer for service accounts."""
+class ServiceAccountRepository(object):
+    """Storage layer for service accounts."""
 
-    def __init__(self, graph, repository):
-        # type: (GroupGraph, ServiceAccountRepository) -> None
-        self.graph = graph
-        self.repository = repository
-
-    def assign_service_account_to_group(self, username, groupname):
-        # type: (str, str) -> None
-        return self.repository.assign_service_account_to_group(username, groupname)
-
-    def enable_service_account(self, name):
-        # type: (str) -> None
-        return self.repository.enable_service_account(name)
-
-    def set_service_account_description(self, name, description):
-        # type: (str, str) -> None
-        return self.repository.set_service_account_description(name, description)
-
-    def set_service_account_mdbset(self, name, mdbset):
-        # type: (str, str) -> None
-        return self.repository.set_service_account_mdbset(name, mdbset)
-
-
-class SQLServiceAccountRepository(ServiceAccountRepository):
-    """SQL storage layer for service accounts."""
-
-    def __init__(self, session, user_repository):
-        # type: (Session, UserRepository) -> None
+    def __init__(self, session):
+        # type: (Session) -> None
         self.session = session
-        self.user_repository = user_repository
 
     def assign_service_account_to_group(self, name, groupname):
         # type: (str, str) -> None
@@ -62,33 +34,37 @@ class SQLServiceAccountRepository(ServiceAccountRepository):
             self.session, service_account_id=service_account.id
         )
         if existing_relationship:
-            raise ServiceAccountHasOwnerException(name, existing_relationship.group_id)
-
-        group_service_account = GroupServiceAccount(
-            group_id=group.id, service_account_id=service_account.id
-        )
-        group_service_account.add(self.session)
+            existing_relationship.group_id = group.id
+        else:
+            group_service_account = GroupServiceAccount(
+                group_id=group.id, service_account_id=service_account.id
+            )
+            group_service_account.add(self.session)
 
     def enable_service_account(self, name):
         # type: (str) -> None
-        # NOTE: The fact that we have this check that the service account exists and then
-        # never use it is an artifact of service accounts being built on top of users.
-        # It can be fixed once the two repositories are properly separate.
         service_account = SQLServiceAccount.get(self.session, name=name)
         if not service_account:
             raise ServiceAccountNotFoundException(name)
-        return self.user_repository.enable_user(name)
 
-    def set_service_account_description(self, name, description):
-        # type: (str, str) -> None
-        service_account = SQLServiceAccount.get(self.session, name=name)
-        if not service_account:
-            raise ServiceAccountNotFoundException(name)
-        service_account.description = description
+        service_account.user.enabled = True
 
-    def set_service_account_mdbset(self, name, mdbset):
-        # type: (str, str) -> None
-        service_account = SQLServiceAccount.get(self.session, name=name)
-        if not service_account:
-            raise ServiceAccountNotFoundException(name)
-        service_account.machine_set = mdbset
+    def mark_disabled_user_as_service_account(self, name, description="", mdbset=""):
+        # type: (str, str, str) -> None
+        """Transform a disabled user into a disabled, ownerless service account.
+
+        WARNING: This function encodes the fact that the user and service account repos
+        are in fact the same thing, as it assumes that a service account is just a user
+        that is marked in a special way. This is a temporary breaking of the abstractions
+        and will have to be cleaned up once the repositories are properly separate.
+        """
+        user = SQLUser.get(self.session, name=name)
+        if not user:
+            raise UserNotFoundException(name)
+
+        service_account = SQLServiceAccount(
+            user_id=user.id, description=description, machine_set=mdbset
+        )
+        service_account.add(self.session)
+
+        user.is_service_account = True

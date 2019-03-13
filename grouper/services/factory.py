@@ -45,10 +45,12 @@ class ServiceFactory(object):
         audit_log_service = AuditLogService(audit_log_repository)
         user_repository = self.repository_factory.create_user_repository()
         service_account_repository = self.repository_factory.create_service_account_repository()
+        group_edge_repository = self.repository_factory.create_group_edge_repository()
         group_request_repository = self.repository_factory.create_group_request_repository()
         return ServiceAccountService(
             user_repository,
             service_account_repository,
+            group_edge_repository,
             group_request_repository,
             audit_log_service,
         )
@@ -65,4 +67,7 @@ class ServiceFactory(object):
         audit_log_service = AuditLogService(audit_log_repository)
         user_repository = self.repository_factory.create_user_repository()
         permission_grant_repository = self.repository_factory.create_permission_grant_repository()
-        return UserService(user_repository, permission_grant_repository, audit_log_service)
+        group_edge_repository = self.repository_factory.create_group_edge_repository()
+        return UserService(
+            user_repository, permission_grant_repository, group_edge_repository, audit_log_service
+        )

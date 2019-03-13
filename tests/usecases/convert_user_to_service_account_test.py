@@ -43,6 +43,7 @@ def test_success(setup):
     assert service_account
     assert service_account.description == ""
     assert service_account.machine_set == ""
+    assert service_account.user_id == service_account_user.id
 
     # Check that the ServiceAccount is owned by the correct Group
     group = Group.get(setup.session, name="some-group")

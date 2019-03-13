@@ -18,3 +18,12 @@ UserGroupRequest = NamedTuple(
         ("status", GroupRequestStatus),
     ],
 )
+
+
+class UserGroupRequestNotFoundException(Exception):
+    """Attempt to operate on a UserGroupRequest not found in the storage layer."""
+
+    def __init__(self, request):
+        # type: (UserGroupRequest) -> None
+        msg = "Group membership request {} not found".format(request.id)
+        super(UserGroupRequestNotFoundException, self).__init__(msg)

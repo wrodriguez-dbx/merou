@@ -2,26 +2,18 @@ from typing import TYPE_CHECKING
 
 from grouper.repositories.audit_log import AuditLogRepository
 from grouper.repositories.checkpoint import CheckpointRepository
-from grouper.repositories.group_edge import GraphGroupEdgeRepository, SQLGroupEdgeRepository
+from grouper.repositories.group_edge import GroupEdgeRepository
 from grouper.repositories.group_request import GroupRequestRepository
 from grouper.repositories.permission import GraphPermissionRepository, SQLPermissionRepository
 from grouper.repositories.permission_grant import GraphPermissionGrantRepository
-from grouper.repositories.service_account import (
-    GraphServiceAccountRepository,
-    SQLServiceAccountRepository,
-)
+from grouper.repositories.service_account import ServiceAccountRepository
 from grouper.repositories.transaction import TransactionRepository
-from grouper.repositories.user import GraphUserRepository, SQLUserRepository
+from grouper.repositories.user import UserRepository
 
 if TYPE_CHECKING:
     from grouper.graph import GroupGraph
     from grouper.models.base.session import Session
-    from grouper.repositories.interfaces import (
-        PermissionRepository,
-        PermissionGrantRepository,
-        ServiceAccountRepository,
-        UserRepository,
-    )
+    from grouper.repositories.interfaces import PermissionRepository, PermissionGrantRepository
 
 
 class RepositoryFactory(object):
@@ -41,8 +33,7 @@ class RepositoryFactory(object):
         return CheckpointRepository(self.session)
 
     def create_group_edge_repository(self):
-        sql_group_edge_repository = SQLGroupEdgeRepository(self.session)
-        return GraphGroupEdgeRepository(self.graph, sql_group_edge_repository)
+        return GroupEdgeRepository(self.graph)
 
     def create_group_request_repository(self):
         # type: () -> GroupRequestRepository
@@ -59,18 +50,7 @@ class RepositoryFactory(object):
 
     def create_service_account_repository(self):
         # type: () -> ServiceAccountRepository
-        sql_group_edge_repository = SQLGroupEdgeRepository(self.session)
-        group_edge_repository = GraphGroupEdgeRepository(self.graph, sql_group_edge_repository)
-
-        group_request_repository = GroupRequestRepository(self.session)
-
-        sql_user_repository = SQLUserRepository(
-            self.session, group_edge_repository, group_request_repository
-        )
-        user_repository = GraphUserRepository(self.graph, sql_user_repository)
-
-        sql_service_account_repository = SQLServiceAccountRepository(self.session, user_repository)
-        return GraphServiceAccountRepository(self.graph, sql_service_account_repository)
+        return ServiceAccountRepository(self.session)
 
     def create_transaction_repository(self):
         # type: () -> TransactionRepository
@@ -78,12 +58,4 @@ class RepositoryFactory(object):
 
     def create_user_repository(self):
         # type: () -> UserRepository
-        sql_group_edge_repository = SQLGroupEdgeRepository(self.session)
-        group_edge_repository = GraphGroupEdgeRepository(self.graph, sql_group_edge_repository)
-
-        group_request_repository = GroupRequestRepository(self.session)
-
-        sql_user_repository = SQLUserRepository(
-            self.session, group_edge_repository, group_request_repository
-        )
-        return GraphUserRepository(self.graph, sql_user_repository)
+        return UserRepository(self.session)
